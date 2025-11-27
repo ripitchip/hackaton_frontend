@@ -1,0 +1,9 @@
+---
+import Layout from '../layouts/Layout.astro';
+import WorkflowDiagram from '../components/WorkflowDiagram.jsx';
+---
+
+<Layout>
+  <!-- This makes the component run only on the client -->
+  <WorkflowDiagram client:load />
+</Layout>

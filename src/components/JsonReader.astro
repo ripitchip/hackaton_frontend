@@ -1,0 +1,77 @@
+---
+const { auto = false } = Astro.props;
+---
+
+<div class="json-reader" data-auto={auto ? 'true' : 'false'} style="margin:1rem 0;">
+  <h2>JSON Reader</h2>
+  <p>Send a POST request to <code>http://localhost:8000/file/return-json/</code> and show the JSON response.</p>
+
+  <div style="display:flex;gap:0.5rem;align-items:center;">
+    <button class="fetch-json-btn">Fetch JSON</button>
+    <span class="status" aria-live="polite" style="color:#555;">idle</span>
+  </div>
+
+  <pre class="json-output" style="white-space:pre-wrap;background:#f6f8fa;padding:1rem;border-radius:6px;margin-top:1rem;max-height:40vh;overflow:auto">No data yet</pre>
+</div>
+
+<script type="module">
+  // Attach a fetch handler to each JsonReader instance on the page.
+  // If the component is rendered with `auto`, it will fetch on load.
+  (function () {
+    const ROOT_SELECTOR = '.json-reader';
+    const ENDPOINT = 'http://localhost:8000/file/return-json/';
+
+    function createHandler(root) {
+      const btn = root.querySelector('.fetch-json-btn');
+      const out = root.querySelector('.json-output');
+      const status = root.querySelector('.status');
+      if (!btn || !out || !status) return;
+
+      async function fetchJson() {
+        status.textContent = 'sending…';
+        out.textContent = '';
+        try {
+          const res = await fetch(ENDPOINT, {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: ''
+          });
+
+          const contentType = res.headers.get('content-type') || '';
+          if (!res.ok) {
+            const text = await res.text();
+            status.textContent = `error (${res.status})`;
+            out.textContent = `Request failed:\n${text}`;
+            return;
+          }
+
+          if (contentType.includes('application/json')) {
+            const json = await res.json();
+            out.textContent = JSON.stringify(json, null, 2);
+            status.textContent = 'done';
+          } else {
+            const text = await res.text();
+            out.textContent = text;
+            status.textContent = 'done (non-json)';
+          }
+        } catch (err) {
+          status.textContent = 'network error';
+          out.textContent = String(err);
+        }
+      }
+
+      btn.addEventListener('click', fetchJson);
+
+      // Auto-run if requested
+      if (root.dataset.auto === 'true') {
+        // run after a short delay to allow other scripts to settle
+        setTimeout(fetchJson, 50);
+      }
+    }
+
+    document.querySelectorAll(ROOT_SELECTOR).forEach(createHandler);
+  })();
+</script>

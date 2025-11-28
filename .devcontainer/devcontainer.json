@@ -1,0 +1,16 @@
+{
+  "name": "Astro Dev Container",
+  "dockerFile": "Dockerfile",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "astro-build.astro",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "GitHub.vscode-pull-request-github"
+      ]
+    }
+  },
+  "forwardPorts": [5173, 8000, 4321] 
+}

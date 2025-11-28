@@ -1,0 +1,48 @@
+---
+const { src = '/assets/model.stl', alt = '3D model' } = Astro.props;
+---
+
+<div class="model-viewer-wrap">
+  <div id="model-viewer" data-src={src} aria-label={alt}></div>
+  <div id="model-error" class="model-error" hidden>
+    <p>Model failed to load. Place a GLB/STL at <code>public/assets/model.glb</code> or change the `src` prop, or drop a file into the viewer.</p>
+  </div>
+
+  <div id="drop-hint" class="drop-hint">
+    <p>Drop a .stl or .glb file here to preview, or <label for="file-input" class="link">choose a file</label>.</p>
+    <input id="file-input" type="file" accept=".stl,.glb,.gltf" style="display:none" />
+  </div>
+</div>
+
+<!-- Load the client script which will initialize three.js on client load -->
+<script type="module" src="/src/scripts/model-viewer.js" client:load></script>
+
+<style>
+  .model-viewer-wrap {
+    width: 100%;
+    max-width: 1200px;
+    height: 640px;
+    margin: 0 auto 24px;
+    position: relative;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+  #model-viewer {
+    width: 100%;
+    height: 100%;
+  }
+  .model-error {
+    position: absolute;
+    inset: 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 16px;
+    text-align:center;
+    background: rgba(255,255,255,0.95);
+    color: #333;
+  }
+  .model-error code{ background:#f3f4f6; padding:2px 6px; border-radius:4px; }
+</style>

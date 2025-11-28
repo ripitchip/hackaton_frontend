@@ -1,0 +1,48 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+  <style>
+    .viewer-page {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .viewer-hint {
+      margin: 12px 0 18px;
+      color: #444;
+      font-size: 14px;
+    }
+    #stl-viewer {
+      width: 100%;
+      height: 720px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #e9eefb;
+      position: relative;
+    }
+    .drop-hint {
+      position: absolute;
+      inset: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events: none;
+      color: rgba(20,30,60,0.6);
+      font-size: 16px;
+    }
+    .drop-hint.drag { background: rgba(0,0,0,0.02); }
+    .controls { margin-top: 10px; display:flex; gap:12px; align-items:center; }
+    .controls input[type=file]{ display:none }
+    .btn { background:#1caad9; color:white; padding:8px 12px; border-radius:6px; cursor:pointer; }
+  </style>
+
+  <div class="viewer-page">
+    <h1>STL Viewer</h1>
+
+    <div id="stl-viewer" data-src="/assets/model.stl"></div>
+    
+  </div>
+
+  <script type="module" src="/src/scripts/view-stl.js" client:load></script>
+</Layout>

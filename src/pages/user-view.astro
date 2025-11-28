@@ -1,0 +1,95 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+  <style>
+    .user-page { max-width: 1100px; margin: 18px auto; }
+    .user-header { display:flex; align-items:center; gap:16px }
+    .avatar { width:84px; height:84px; border-radius:12px; background:#eef2ff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:22px; color:#0b84a5 }
+    .user-meta h2 { margin:0; font-size:22px }
+    .user-meta .sub { color:#6b7280; font-size:13px; margin-top:6px }
+
+    .layout-grid { display:grid; grid-template-columns: 1fr 360px; gap:18px; margin-top:18px }
+    .card { background:#fff; padding:14px; border-radius:10px; box-shadow:0 8px 30px rgba(17,16,29,0.04) }
+    canvas { width:100% !important; height:320px !important }
+
+    .info-table { width:100%; border-collapse:collapse; margin-top:10px }
+    .info-table td { padding:8px 6px; vertical-align:top }
+    .muted { color:#6b7280; font-size:13px }
+  </style>
+
+  <div class="user-page">
+    <div class="user-header">
+      <div class="avatar" id="avatar">JP</div>
+      <div class="user-meta">
+        <h2 id="user-fullname">Jacques Petit</h2>
+        <div class="sub" id="user-role">Expert Technique — Poste 1</div>
+        <div class="muted" id="user-comment">Technician summary…</div>
+      </div>
+    </div>
+
+    <div class="layout-grid">
+      <div>
+        <div class="card">
+          <h3>Performance metrics</h3>
+          <canvas id="userChart"></canvas>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Detailed stats</h3>
+          <table class="info-table">
+            <tbody id="stats-table-body">
+              <!-- rows inserted by script -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside>
+        <div class="card">
+          <h3>Profile</h3>
+          <table class="info-table">
+            <tbody id="profile-table-body">
+              <!-- profile rows inserted by script -->
+            </tbody>
+          </table>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- embed the user JSON here (this is the provided sample) -->
+  <script id="user-data" type="application/json">{
+  "user": {
+    "Matricule": "AIR0001",
+    "Prénom": "Jacques",
+    "username": "Jacques Petit",
+    "Âge": 49,
+    "Qualification": "Expert Technique",
+    "Poste de montage": "Poste 1",
+    "Description du poste": "Travail sur Poste 1, assemblage et contrôle",
+    "Compétences": "Assemblage Niveau 3, Montage mécanique Niveau 3, Lecture plan Niveau 3",
+    "Habilitations": "Pneumatique Certifié",
+    "Coût horaire (€)": 42.5,
+    "Niveau d'expérience": "Expert",
+    "Rotation": "Semaine 1: Poste 55 | Semaine 3: Poste 50",
+    "Commentaire de Carrière": "Technicien aéronautique ayant débuté comme opérateur, a progressivement gravi les échelons pour devenir expert technique en maintenance des trains d'atterrissage, capitalisant 25 ans d'expérience.",
+    "first_name": "Jacques",
+    "last_name": "Petit",
+    "full_name": "Jacques Petit"
+  },
+  "stats": {
+    "nb_operations": 15,
+    "cycle_moyen_heures": 0.478,
+    "ecart_moyen_heures": null,
+    "nb_aleas": 15,
+    "taux_aleas_pct": 100,
+    "performance_score": 60
+  }
+}</script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="/src/scripts/user-view.js" client:load></script>
+</Layout>

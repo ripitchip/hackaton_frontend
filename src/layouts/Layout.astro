@@ -1,22 +1,59 @@
+---
+import Sidebar from '../components/Sidebar.astro';
+---
+
 <!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro Basics</title>
+		<!-- Boxicons CDN for icons used by the sidebar -->
+		<link href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet" />
 	</head>
 	<body>
-		<slot />
-	</body>
-</html>
+		<Sidebar />
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
+		<!-- Page content will be placed here; Sidebar CSS shifts .home-section automatically -->
+		<main class="home-section">
+			<slot />
+		</main>
+
+		<!-- Sidebar behavior: hydrate on client load -->
+		<script type="module" src="/src/scripts/sidebar.js" client:load></script>
+	</body>
+	<style>
+		html,
+		body {
+			margin: 0;
+			width: 100%;
+			height: 100%;
+		/* Ensure main uses the same background and is offset to make room for the sidebar */
+		.home-section{
+			position: relative;
+			background: #E4E9F7;
+			min-height: 100vh;
+			top: 0;
+			left: 78px; /* closed sidebar width */
+			width: calc(100% - 78px);
+			transition: all 0.5s ease;
+			z-index: 2;
+			padding: 20px;
+		}
+		/* when sidebar opens (it is a sibling before <main>), shift content */
+		.sidebar.open ~ .home-section{
+			left: 250px; /* open sidebar width */
+			width: calc(100% - 250px);
+		}
+		.home-section .text{
+			display: inline-block;
+			color: #11101d;
+			font-size: 25px;
+			font-weight: 500;
+			margin: 18px;
+		}
+		}
+	</style>
+</html>

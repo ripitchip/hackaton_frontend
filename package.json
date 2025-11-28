@@ -11,9 +11,12 @@
   "dependencies": {
     "@astrojs/react": "^4.4.2",
     "astro": "^5.16.1",
+    "chart": "^0.1.2",
+    "chart.js": "^4.5.1",
     "dagre": "^0.8.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "reactflow": "^11.11.4"
+    "reactflow": "^11.11.4",
+    "three": "^0.181.2"
   }
 }

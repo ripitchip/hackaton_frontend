@@ -60,6 +60,8 @@ const getNodeColor = (title = '') => {
 export default function WorkflowDiagram() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -94,6 +96,8 @@ export default function WorkflowDiagram() {
                 <div style={{ fontSize: 11, opacity: 0.7 }}>({step.id})</div>
               </div>
             ),
+            // attach the original step metadata so click handlers can show it
+            meta: step,
           },
           position: { x: 0, y: 0 }, // sera recalculé par dagre
           style: {
@@ -102,6 +106,7 @@ export default function WorkflowDiagram() {
             borderRadius: 8,
             background: getNodeColor(step.title),
             boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
+            cursor: 'pointer',
           },
         }));
 
@@ -151,15 +156,24 @@ export default function WorkflowDiagram() {
     [],
   );
 
+  const onNodeClick = useCallback((event, node) => {
+    // node.data.meta was attached during construction
+    setSelectedNode(node?.data?.meta || { id: node?.id, label: node?.data?.label });
+  }, []);
+
+  const clearSelection = useCallback(() => setSelectedNode(null), []);
+
   if (loading) return <div>Loading workflow...</div>;
   if (error) return <div style={{ color: 'red' }}>Error: {error}</div>;
 
   return (
-    <div style={{ height: '100vh', width: '100%' }}>
+    <div style={{ height: '100vh', width: '100%', position: 'relative' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onConnect={onConnect}
+        onNodeClick={onNodeClick}
+        onPaneClick={clearSelection}
         fitView
         fitViewOptions={{ padding: 0.2 }}
       >
@@ -170,6 +184,102 @@ export default function WorkflowDiagram() {
         <Controls />
         <Background gap={24} />
       </ReactFlow>
+
+      {/* styled right-side panel for the selected node */}
+      {selectedNode && (
+        <aside
+          role="dialog"
+          aria-labelledby="wf-node-title"
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            height: '100%',
+            width: 380,
+            maxWidth: '40%',
+            background: '#ffffff',
+            borderLeft: '1px solid rgba(0,0,0,0.06)',
+            padding: 18,
+            zIndex: 9999,
+            boxShadow: '-10px 0 30px rgba(0,0,0,0.08)',
+            display: 'flex',
+            flexDirection: 'column',
+            transition: 'transform 220ms ease',
+          }}
+        >
+          <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <div>
+              <div id="wf-node-title" style={{ fontSize: 16, fontWeight: 700 }}>{selectedNode.title || selectedNode.name || `Node ${selectedNode.id}`}</div>
+              <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>ID: {selectedNode.id}</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(JSON.stringify(selectedNode, null, 2));
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1400);
+                  } catch (e) {
+                    // ignore clipboard failures
+                  }
+                }}
+                title="Copy JSON"
+                style={{ background: '#eef2ff', border: 'none', padding: '6px 10px', borderRadius: 6, cursor: 'pointer', fontSize: 13 }}
+              >
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+              <button onClick={clearSelection} aria-label="Close panel" style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 18 }}>
+                ✕
+              </button>
+            </div>
+          </header>
+
+          <main style={{ marginTop: 12, overflowY: 'auto', flex: 1 }}>
+            {/* nice fields presentation */}
+            {selectedNode.dependencies && (
+              <section style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Dependencies</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {selectedNode.dependencies.length ? (
+                    selectedNode.dependencies.map((d) => (
+                      <span key={d} style={{ background: '#f1f5f9', padding: '6px 8px', borderRadius: 6, fontSize: 12 }}>{d}</span>
+                    ))
+                  ) : (
+                    <div style={{ color: '#9ca3af', fontSize: 13 }}>None</div>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* render other metadata keys (except common ones) */}
+            <section>
+              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Properties</div>
+              <div style={{ fontSize: 13, color: '#374151' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <tbody>
+                    {Object.keys(selectedNode || {}).filter(k => !['id','title','name','dependencies'].includes(k)).map((k) => (
+                      <tr key={k}>
+                        <td style={{ padding: '6px 8px', verticalAlign: 'top', width: '38%', color: '#6b7280', fontSize: 13 }}>{k}</td>
+                        <td style={{ padding: '6px 8px', verticalAlign: 'top', fontSize: 13 }}>
+                          {typeof selectedNode[k] === 'object' ? (
+                            <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: 12 }}>{JSON.stringify(selectedNode[k], null, 2)}</pre>
+                          ) : (
+                            String(selectedNode[k])
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </main>
+
+          <footer style={{ marginTop: 12, textAlign: 'right', fontSize: 12, color: '#9ca3af' }}>
+            Click background to close
+          </footer>
+        </aside>
+      )}
     </div>
   );
 }
